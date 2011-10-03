@@ -5,7 +5,7 @@ import os.path as path
 
 from subprocess import PIPE,Popen
 
-pth = '/home/david/projects/alfresco/vgr/'
+pth = '/home/david/Projekt/alfresco/vgr/'
 old_src = path.join(pth,'workspace/alfresco-src-3.3.5/root/')
 new_src = path.join(pth,'alfresco-enterprise-3.4.4/')
 src = path.join(pth,'workspace/trunk');
@@ -98,7 +98,12 @@ for f in folders:
         foo = path.join(src_pth,pth[full_new_len:])
         if path.isfile( foo ):
             #we have a source file!
-            changed.append(foo[rm_len:])    
+            changed.append({
+                "short":foo[rm_len:],
+                "old": path.join(full_old,pth[full_new_len:]),
+                "new": pth,
+                "our": foo
+            })    
         #else: 
         #    print "no diff ",foo
         
@@ -109,25 +114,32 @@ for f in folders:
         foo = path.join(src_pth,pth[full_old_len:])
         if path.isfile( foo ):
             #we have a removed source file
-            removed.append(foo[rm_len:])   
+            removed.append({
+                "short":foo[rm_len:],
+                "old": pth,
+                "new": "",
+                "our": foo
+            })   
         #else:
         #    print "not removed ",foo
         
-    print f['name']
+    #print f['name']
     if removed != []:
-        print "Removed"
-        print  "\n".join(removed)
-    else:
-        print "No files were removed"
+        #print "Removed"
+        for obj in removed:
+            print  'meld %(old)s %(our)s' % obj
+    #else:
+    #    print "No files were removed"
         
     if changed != []:
-        print "Changed files that need to be diffed"
-        print "\n".join(changed)
-    else:
-        print "No files where changed"
+        #print "Changed files that need to be diffed"
+        for obj in changed:
+            print  'meld --diff %(old)s %(our)s --diff %(old)s %(new)s  --diff %(old)s %(our)s %(new)s --diff %(our)s %(new)s' % obj 
+    #else:
+    #    print "No files where changed"
         
-    print 
-    print
+    #print 
+    #print
     
 
 
