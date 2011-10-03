@@ -24,7 +24,8 @@ class Alfresco(object):
         if scope == "repo":
             self.sync_repo()
         elif scope == "share":
-            self.sync_repo()
+            self.sync_share()
+            self.sync_webapp()
         elif scope == "webapp":
             self.sync_webapp()
         elif scope == "all":
@@ -88,7 +89,7 @@ share:   %s
     
     parser = argparse.ArgumentParser(description="Hotdeployment skript for alfresco")
     parser.add_argument('-q','--quiet' ,help="Disable notfications",default=False)
-    parser.add_argument('-n','--notification',default="notify-send --hint=int:transient:1 %s",help="Notification binary, change on mac os x")
+    parser.add_argument('-n','--notification',default='notify-send --hint=int:transient:1 "%s"',help="Notification binary, change on mac os x")
     parser.add_argument('-t','--tomcat',default="../alfresco-3.3.5/tomcat"     ,help="Path to tomcat, default is ../../tomcat")
     parser.add_argument('-s','--share' ,default="trunk/share/src/main/",help="Path to share src , default is ./share/src/main/")
     parser.add_argument('-r','--repo'  ,default="trunk/repo/src/main/" ,help="Path to tomcat, default is ./repo/src/main/")
@@ -117,7 +118,7 @@ share:   %s
 
     rel.set_defaults(func=rel_func)
 
-    both = sub.add_parser('both',help="Sync and reload")
+    both = sub.add_parser('deploy',help="Sync and reload")
     both.add_argument('scope',choices=['repo','share','all'])
 
     def both_func(args):
