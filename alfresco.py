@@ -64,11 +64,11 @@ class Alfresco(object):
 
     def reload_repo(self):
         """ Reload repo webscripts using it's webservice (with curl)"""
-        self.call('curl --user admin:admin --data-urlencode "reset=on" %s/alfresco/service/index %s' %  (self.host,self.quiet and '> /dev/null 2>&1' or ''),shell=True)
+        self.call('curl -o /tmp/curl.html --user admin:admin --data-urlencode "reset=on" %s/alfresco/service/index %s' %  (self.host,self.quiet and '> /dev/null 2>&1' or ''),shell=True)
 
     def reload_share(self):
         """ Reload share webscripts using it's webservice (with curl)"""
-        self.call('curl --user admin:admin --data-urlencode "reset=all" %s/share/page/console %s' % (self.share_host,self.quiet and '> /dev/null 2>&1' or ''),shell=True)
+        self.call('curl -o /tmp/curl.html --user admin:admin --data-urlencode "reset=all" %s/share/page/console %s' % (self.share_host,self.quiet and '> /dev/null 2>&1' or ''),shell=True)
         
     def sync_repo(self):
         """ rsync repo webscripts"""
