@@ -57,7 +57,7 @@ class Alfresco(object):
         if scope == "repo":
             self.reload_repo()
         elif scope == "share":
-            self.reload_repo()
+            self.reload_share()
         elif scope == "all":
             self.reload_repo()
             self.reload_share()
