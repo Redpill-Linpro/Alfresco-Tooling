@@ -109,7 +109,7 @@ share:   %s
     #some mac os x love
     notification_cmd = sys.platform.startswith('darwin') and 'growlnotify -m "%s"' or 'notify-send --hint=int:transient:1 "%s"'
     
-    parser = argparse.ArgumentParser(description="Hotdeployment skript for alfresco")
+    parser = argparse.ArgumentParser(description="Hotdeployment script for alfresco")
     parser.add_argument('-q','--quiet',action="store_true", default=False,help="Disable output")
     parser.add_argument('-N','--no-notification',action="store_true", default=False,help="Disable notfications")
     parser.add_argument('-n','--notification',default=notification_cmd,help="Notification binary")
