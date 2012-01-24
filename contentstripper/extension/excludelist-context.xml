@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE beans PUBLIC "-//SPRING/DTD BEAN//EN"
+	"http://www.springframework.org/dtd/spring-beans.dtd">
+<beans>
+<!-- 
+<bean id="webscript.admin.excludelist.get" 
+      class="org.redpilllinpro.alfresco.acs.ExcludeList" 
+      parent="webscript">
+   <property name="serviceRegistry" ref="ServiceRegistry" />
+</bean>
+ -->
+
+	<bean id="redpilllinpro.contentUrlScript" parent="baseJavaScriptExtension" class="org.redpilllinpro.alfresco.acs.ContentUrlResolver">
+        <property name="extensionName">
+            <value>contentUrlResolver</value>
+        </property>
+        <property name="serviceRegistry">
+            <ref bean="ServiceRegistry"/>
+        </property>
+    </bean>
+
+</beans>
