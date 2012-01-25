@@ -4,7 +4,8 @@ This is a tool used to get a list with content paths in alf_data for content nee
 The content paths listed are 
 1) All content in Company Home/Data Dictionary
 2) All content in avm:sitestore
-3) *optional* all content in a site
+or
+3) If a site is provided: all content in the site
 
 The tool is exposed as a webscript on /alfresco/service/admin/excludelist you could also add the optional parameter site to
 include content from a particular site in the path list. Example: /alfresco/service/admin/excludelist?site=testsite will return 
