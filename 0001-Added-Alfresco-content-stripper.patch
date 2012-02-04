@@ -1,0 +1,328 @@
+From da835d664d2fbf79d4aace72deb167338911d369 Mon Sep 17 00:00:00 2001
+From: Carl Nordenfelt <carl.nordenfelt@gmail.com>
+Date: Tue, 24 Jan 2012 12:03:58 +0100
+Subject: [PATCH] Added Alfresco content stripper
+
+---
+ contentstripper/README.txt                         |   27 +++++++++
+ .../alfresco/acs/ContentUrlResolver.class          |  Bin 0 -> 1626 bytes
+ contentstripper/dist/ContentUrlResolver.jar        |  Bin 0 -> 1113 bytes
+ contentstripper/dist/extension.tar.gz              |  Bin 0 -> 1703 bytes
+ contentstripper/extension/excludelist-context.xml  |   22 +++++++
+ .../webscripts/admin/exclude-list.get.desc.xml     |   10 +++
+ .../templates/webscripts/admin/exclude-list.get.js |   60 ++++++++++++++++++++
+ .../webscripts/admin/exclude-list.get.xml.ftl      |    9 +++
+ .../alfresco/acs/ContentUrlResolver.java           |   36 ++++++++++++
+ 9 files changed, 164 insertions(+), 0 deletions(-)
+ create mode 100644 contentstripper/README.txt
+ create mode 100644 contentstripper/bin/org/redpilllinpro/alfresco/acs/ContentUrlResolver.class
+ create mode 100644 contentstripper/dist/ContentUrlResolver.jar
+ create mode 100644 contentstripper/dist/extension.tar.gz
+ create mode 100644 contentstripper/extension/excludelist-context.xml
+ create mode 100644 contentstripper/extension/templates/webscripts/admin/exclude-list.get.desc.xml
+ create mode 100644 contentstripper/extension/templates/webscripts/admin/exclude-list.get.js
+ create mode 100644 contentstripper/extension/templates/webscripts/admin/exclude-list.get.xml.ftl
+ create mode 100644 contentstripper/src/org/redpilllinpro/alfresco/acs/ContentUrlResolver.java
+
+diff --git a/contentstripper/README.txt b/contentstripper/README.txt
+new file mode 100644
+index 0000000..b5ef53a
+--- /dev/null
++++ b/contentstripper/README.txt
+@@ -0,0 +1,27 @@
++Instructions for use
++--------------------
++This is a tool used to get a list with content paths in alf_data for content needed to preserve consistency in the repository.
++The content paths listed are 
++1) All content in Company Home/Data Dictionary
++2) All content in avm:sitestore
++3) *optional* all content in a site
++
++The tool is exposed as a webscript on /alfresco/service/admin/excludelist you could also add the optional parameter site to
++include content from a particular site in the path list. Example: /alfresco/service/admin/excludelist?site=testsite will return 
++something like:
++
++2011/10/18/15/16/fb4a374d-1fe3-4a4e-a16d-df2544f5864c.bin
++2011/10/18/15/16/536f0e41-17e6-479e-805a-2bf7c95363d9.bin
++2011/10/18/15/16/b0537345-1ace-473c-9c14-9b42f03e2e91.bin
++2011/10/18/15/16/68563683-d41c-432a-9bf2-be0e31381a40.bin
++2011/10/18/15/16/94826d2e-387b-43ae-9b1d-5edc34549757.bin
++2011/10/18/15/16/9e6749fb-d41a-4586-8e83-467e03517e53.bin
++2011/10/18/15/16/59485495-c409-43ed-9752-be89b975930b.bin
++2011/10/18/15/16/d80fcd79-8235-46ae-aaf3-65c814f288ef.bin
++...
++
++Instructions for deployment
++---------------------------
++* Put the content of the extension folder (or zip) in tomcat/shared/classes/alfresco/extension
++* Put the ContentUrlResolver.jar in tomcat/webapps/alfresco/WEB-INF/lib
++* Restart Tomcat
+\ No newline at end of file
+diff --git a/contentstripper/bin/org/redpilllinpro/alfresco/acs/ContentUrlResolver.class b/contentstripper/bin/org/redpilllinpro/alfresco/acs/ContentUrlResolver.class
+new file mode 100644
+index 0000000000000000000000000000000000000000..8f7e4ce2e6bdd77336f5507fb78cd5f84faa52cd
+GIT binary patch
+literal 1626
+zcmb7ET~8B16g^W4Tb2S^KtK@}MQACoe5q)GL=h5`LI_o&kIQyi7nhx8c1z&RpQMRO
+z&_v&S@HZLbo$W$VD1n#xy!V_l_hWwj`T8Be3>G!S7^a0Ro01nRj_bOPSCPWB+>+$J
+zO$*yMmxUK_FL)*0P3{YKk4p`4hI!?7Vkmh<m^;2Lol0OnvwU8#Ma9~7`GyoW_kAH(
+z_6fyzgvXHZx!iN;m|-OU4@`7n7HS5YyzKaaJjgM$EI6JMEHN~tGg}PtWl`ihn$VVn
+zh6F=r-tqW)b$6S~mx`Aml^3?<ZduY%`{*zpymg3nHl)4Mqe(-`=fQu<7&7V0Jt4Ez
+z3WlyEn$bdXqn94PkfFWIgL<eLo;JX>cO_-3B77$h^1xiDIBfD#E|cG}_AJx2ys}vc
+zq~n!Iu)eZy^GZNL_cio04AyPdtFF5t97-)^CNgTnE!@^Hz%YE7tRyjrI}F_<eARLJ
+zs&I>3M)6^oOJ~jxjC#N>sdmjXUb!|5;hu)O3{&SSxWG4wVcchEi`2aEN`m3_RfBj5
+zR)tJLN0HHxW*EJsOA=$qGIZ3_{M-sGD#eT9bSlwNZ78RljtQ6=CK=3z?B}~C(Ss?<
+z8Ijg&A*z=IW(aUuRNbQCiNK&QK()JJ*FFHFDqW)_B;6IcvAAe>R6;{K`Y@+@@Bu?l
+z`YfnwR!w<Okupp)E{Rimk87Hmy;P!ZooVdVsF0|i3V~(6TeB)r=j#Pgl{Qy3$Ix5v
+zwBt{0QpJPHk4WirWQeIorBxHH>4%}Qm3Ai0jOOOCL+BrA5kr#3mhdovc3LNE2IxR1
+z?HI1%I*rPCiL7JFdMx`Hsk*lwo^}&qPl#}%W)&eQ^zM*>A`ErcOBiv&><dxflSCys
+zJ@yHyBiv+I%l<^yc=iZJ3`ZDY_=52d-_Z9aHGPQLA7tAUs!kCK&<~yZz5@fQokM=3
+ihIhiB#zQ<JKAkM)@t71mAwLSqZwzW-$a1ugVc{=OMZ<3Z
+
+literal 0
+HcmV?d00001
+
+diff --git a/contentstripper/dist/ContentUrlResolver.jar b/contentstripper/dist/ContentUrlResolver.jar
+new file mode 100644
+index 0000000000000000000000000000000000000000..fa030a9dd16141251b20c9be167be93b879cd268
+GIT binary patch
+literal 1113
+zcmWIWW@Zs#-~ht3C<_M$Bp|}T!r<!~;;8HC=ce!L=;!I?8XThM>-O&y1H)(EGpBvL
+zb@eXtdh2SPJ9B<>kiiw>2Tvb8Wnu{MX6M*c&-6|jXp|%n2f!`(?t*H8IZ!sgC|$oO
+zHKiakCnqN}ub?PjKQSk*D782l$Ve{Mch1i%NzE$>Ey@W>EzZv=OD)n%&PgmTo*EMC
+zFYG8{8_X5GjXQ&p(J@9O@ix=x>0M$TB8rBZEdi>(cH}HCExehTww>kPAJ17USbV>n
+zWv`!Xc<-*6h@;PMqxs+G6~CKX{rvfR{re1Ol3g8p68%nW(yZM0XvezO6{4Cxr*%Ew
+z-QKdHw%E6V@q5$sOLrgcE8yQ5B9I=zb@v>P>Uxgi``ecWbDmi~?L7Ck6%o~X_op3t
+zwom`bFTsUB`aVbq*-dZflQs5v^1o?i{EXIHdk&xOlRxoT#`*ZB$Cd}RoM%tGm)fzu
+zQz`sn+Y&Zb&bE1b9)Dc>>Y&_oeW$p#khmMuc4vF4-?`5J_@H!qhWIC4c3-I=JAOTl
+zWDn`HtrPCOWpQ5LR#q}0=D(6(_)K=*ur~GZ2e;UbPHlV7;v_dadP=)&+^MCXe_vae
+zx@%gv8FypJ9wW}M>-{-#oEk6pH7T}TY&#ovwRC%{bIqqS8l8!Ef(#BB-1G5}ax0v@
+zu)ihWLhrsn-o(?pcn>d{xX-GAIq2=I>3fPidmgT9vgX;m_E(m~aoe_(*t5m!RV3oJ
+z&N`wN;hZ95)wzYKIdPMxIIm=i<Syy+f6j2}XdV6k^yQpm#eSBemkmVE7|hV!mG$Dd
+z&fb|H`>Q+?<}qA%xvKkW9!E*!>YBUjcD@dM`ASvs<+>AJr;6TPEF=|d*l~0N`+MUr
+z($gIer-kl`s*_w6UB#F6EvR!>>AtT{i|Vvkru{9uyy}W|yl%&;EtMIk3<`GcPj`A5
+zQs?3|U)fnFCnRd?#aVR{Qr4O2m(FD5ouA|I*P&a&M9O;6VU}GPSF+e%xcRe`@Lqp?
+zZgq+*_gdqd{vM`#uD;mPU-L`3McQ<=mD7$_-4YsyFWzOCdo<HrV&OjJ&V?z;p9NP2
+z-$}V~=AXm+kZ&SYJj-V!{ODQvJ>Kw#m1%iX>-)d}#r&>-2E|A6YU?I$n5$g3x2^nG
+z{sTriq4{27-W4ufa_$#5#Y==Pn(}l}#I*n5Y~yEiukaER149%WDBCbHi7+5?CUTYn
+s<xEt7E1x2p0?K~KHh{7p0we;NWM;+yZ&sj#85o#=a5a#g!3^R70BT*kBLDyZ
+
+literal 0
+HcmV?d00001
+
+diff --git a/contentstripper/dist/extension.tar.gz b/contentstripper/dist/extension.tar.gz
+new file mode 100644
+index 0000000000000000000000000000000000000000..0e799f6db3635a40661d63dc373cc6a7760f4741
+GIT binary patch
+literal 1703
+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
+
+literal 0
+HcmV?d00001
+
+diff --git a/contentstripper/extension/excludelist-context.xml b/contentstripper/extension/excludelist-context.xml
+new file mode 100644
+index 0000000..b8b71c2
+--- /dev/null
++++ b/contentstripper/extension/excludelist-context.xml
+@@ -0,0 +1,22 @@
++<?xml version="1.0" encoding="UTF-8"?>
++<!DOCTYPE beans PUBLIC "-//SPRING/DTD BEAN//EN"
++	"http://www.springframework.org/dtd/spring-beans.dtd">
++<beans>
++<!-- 
++<bean id="webscript.admin.excludelist.get" 
++      class="org.redpilllinpro.alfresco.acs.ExcludeList" 
++      parent="webscript">
++   <property name="serviceRegistry" ref="ServiceRegistry" />
++</bean>
++ -->
++
++	<bean id="redpilllinpro.contentUrlScript" parent="baseJavaScriptExtension" class="org.redpilllinpro.alfresco.acs.ContentUrlResolver">
++        <property name="extensionName">
++            <value>contentUrlResolver</value>
++        </property>
++        <property name="serviceRegistry">
++            <ref bean="ServiceRegistry"/>
++        </property>
++    </bean>
++
++</beans>
+\ No newline at end of file
+diff --git a/contentstripper/extension/templates/webscripts/admin/exclude-list.get.desc.xml b/contentstripper/extension/templates/webscripts/admin/exclude-list.get.desc.xml
+new file mode 100644
+index 0000000..de83fcb
+--- /dev/null
++++ b/contentstripper/extension/templates/webscripts/admin/exclude-list.get.desc.xml
+@@ -0,0 +1,10 @@
++<webscript>
++   <shortname>Get a list of content urls</shortname>
++   <description>
++      The URLs returned are for content in Data Dictionary, avm://sitestore and any site provided. This is the content needed to preserve consistency.
++   </description>
++   <url>/admin/excludelist?site={site?}</url>
++   <format default="xml">argument</format>
++   <authentication>admin</authentication>
++   <transaction allow="readonly">required</transaction>
++</webscript>
+\ No newline at end of file
+diff --git a/contentstripper/extension/templates/webscripts/admin/exclude-list.get.js b/contentstripper/extension/templates/webscripts/admin/exclude-list.get.js
+new file mode 100644
+index 0000000..cdfebc3
+--- /dev/null
++++ b/contentstripper/extension/templates/webscripts/admin/exclude-list.get.js
+@@ -0,0 +1,60 @@
++script:
++{
++	
++	var dictionaryNodesQuery = "PATH:\"/app:company_home/app:dictionary//*\" AND TYPE:\"cm:content\"";
++	var siteStoreName = "avm://sitestore";
++	
++	logger.log("site = " + args.site);
++
++	// check if a site has been provided, if so add the site content to the exclude list...
++	if (args.site == undefined  || args.site == null || args.site.length == 0 || siteService.getSite(args.site) == null) {
++		logger.log("Skipping site content exclusion as no site was provided");
++		model.siteNodes = [];
++	}
++	else {
++		logger.log("Excluding content in site " + args.site);
++		var siteNodesQuery = "PATH:\"/app:company_home/st:sites/cm:" + args.site + "//*\" AND TYPE:\"cm:content\"";
++		var nodes = search.luceneSearch(siteNodesQuery);
++		var siteNodes = [];
++		for (var i=0; i<nodes.length; i++) {
++			siteNodes.push(contentUrlResolver.getContentUrl(nodes[i].nodeRef));
++		}
++		model.siteNodes = siteNodes;
++	}
++	
++	// add all content in data dictionary to the exclude list
++	var nodes = search.luceneSearch(dictionaryNodesQuery);
++	var dictionaryNodes = [];
++	for (var i=0; i<nodes.length; i++) {
++		logger.log("Adding " + nodes[i] + " to dictionary nodes");
++		dictionaryNodes.push(contentUrlResolver.getContentUrl(nodes[i].nodeRef));
++	}
++	model.dictionaryNodes = dictionaryNodes;
++	
++	//add all content in avm:sitestore to the exclude list (to keep site settings correct)
++	var xpathnodes = search.xpathSearch(siteStoreName, "/");
++	var siteStoreNodes = [];
++	if(xpathnodes[0] == undefined || xpathnodes[0] == null) {
++		status.code = 404;
++		status.message = "AVM store " + siteStoreName + " not found.";
++		status.redirect = true;
++		break script;
++	}
++	else {
++		logger.log("Found AVM store " + siteStoreName);
++		addAvmNode(xpathnodes[0], siteStoreNodes);		
++	}
++	
++	model.avmNodes = siteStoreNodes;
++}
++
++function addAvmNode(parentNode, nodes) {
++	if(parentNode.isContainer && parentNode.childAssocs["cm:contains"] != null) {
++		for (var i = 0; i<parentNode.childAssocs["cm:contains"].length; i++) {
++			addAvmNode(parentNode.childAssocs["cm:contains"][i], nodes);
++		}
++	}
++	else if(parentNode.isDocument){
++		nodes.push(contentUrlResolver.getContentUrl(parentNode.nodeRef));
++	}
++} 
+\ No newline at end of file
+diff --git a/contentstripper/extension/templates/webscripts/admin/exclude-list.get.xml.ftl b/contentstripper/extension/templates/webscripts/admin/exclude-list.get.xml.ftl
+new file mode 100644
+index 0000000..fca64d0
+--- /dev/null
++++ b/contentstripper/extension/templates/webscripts/admin/exclude-list.get.xml.ftl
+@@ -0,0 +1,9 @@
++<#list dictionaryNodes as d>
++${d?replace('store://?', '', 'r')}
++</#list>
++<#list siteNodes as s>
++${s?replace('store://?', '', 'r')}
++</#list>
++<#list avmNodes as a>
++${a?replace('store://?', '', 'r')}
++</#list>
+\ No newline at end of file
+diff --git a/contentstripper/src/org/redpilllinpro/alfresco/acs/ContentUrlResolver.java b/contentstripper/src/org/redpilllinpro/alfresco/acs/ContentUrlResolver.java
+new file mode 100644
+index 0000000..b3891df
+--- /dev/null
++++ b/contentstripper/src/org/redpilllinpro/alfresco/acs/ContentUrlResolver.java
+@@ -0,0 +1,36 @@
++package org.redpilllinpro.alfresco.acs;
++
++import org.alfresco.repo.jscript.BaseScopableProcessorExtension;
++import org.alfresco.service.ServiceRegistry;
++import org.alfresco.service.cmr.model.FileFolderService;
++import org.alfresco.service.cmr.repository.NodeRef;
++
++public class ContentUrlResolver extends BaseScopableProcessorExtension {
++
++	/** Repository Service Registry */
++    private ServiceRegistry services;
++
++    /**
++     * Set the service registry
++     * 
++     * @param serviceRegistry the service registry
++     */
++    public void setServiceRegistry(ServiceRegistry serviceRegistry)
++    {
++        this.services = serviceRegistry;
++    }
++    	
++    public String getContentUrl(final NodeRef nodeRef) throws java.lang.NullPointerException {
++    	
++    	final FileFolderService ffs = services.getFileFolderService();
++    	
++    	if(nodeRef != null) {
++    		return ffs.getFileInfo(nodeRef).getContentData().getContentUrl();
++    	}
++    	
++    	throw new NullPointerException("Could not resolve content url for node == null!");
++    	
++    }
++    
++    
++}
+-- 
+1.7.1
+

@@ -1,0 +1,10 @@
+<webscript>
+   <shortname>Get a list of content urls</shortname>
+   <description>
+      The URLs returned are for content in Data Dictionary, avm://sitestore and any site provided. This is the content needed to preserve consistency.
+   </description>
+   <url>/admin/excludelist?site={site?}</url>
+   <format default="xml">argument</format>
+   <authentication>admin</authentication>
+   <transaction allow="readonly">required</transaction>
+</webscript>
