@@ -1,0 +1,206 @@
+Sorry for the swedish, this is written for a client and I'll translate it
+or refactor the information into a readme later /david
+
+
+Hur man skriver tester i Cucumber till Alfresco
+===============================================
+
+Cucumber[1] är ett BDD testramverk, dvs man skriver sina tester i naturligt språk
+och i vårt fall på svenska, det finns vissa regler och språket kallas gherkin[2]
+Scenarion samlas utefter den egenskap ("feature") som vill testa i en .feature 
+fil. Se upp med att trots att vi skriver testerna på Svenska så får inte 
+filnamnen innehålla åäö osv.
+
+Ett exempel, skapa_plats.feature:
+
+    #language: sv
+    Egenskap: Automatiskt url vid skapandet av plats
+        När man skapar en plats får man automatiskt en trevlig url satt utefter
+        platsens namn
+    
+     Bakgrund:
+       Givet att jag är inloggad som admin
+    
+     @javascript @share
+     Scenario: Skapa plats
+       Givet att jag är på min anslagstavla
+       När jag klickar på länken "Skapa webbplats"
+       Så ska jag se dialogen "Skapa webbplats"
+       När jag fyller i namn fältet med "Härliga tider!"
+       Så ska URL namn automatiskt fyllas med "hrligatider"
+
+
+Vi börjar med att speca språket, se till att använda UTF-8 encoding för filen:
+
+    #language: sv
+
+Sedan ger vi en beskrivning av den "feature" vi vill testa, en fil == en feature,
+men kan ha flera test scenarion. "Egenskap" har egentligen ingen betydelse mer
+än för dokumentation.
+
+    Egenskap: Kort namn + beskrivning av det vi vill testa
+
+Sedan har vi en "Bakgrund", backgrunder specificerar gemensamma steg för alla 
+scenarion i filen, och körs före varje scenario. Bakgrunder är inte 
+obligatoriska.
+
+Till sist kommer vårt scenario, och man kan ha flera stycken i samma fil.
+Vart och en testar en sak. Först kommer taggar/annoteringar, det finns en del
+speciella taggar, *@javascript* är en av dem, annars kan man hitta på vad man 
+vill. *@javascript*  är en konfiguration som säger att cucumber måste köra 
+testet med något som kan hantera javascript, tex capybara[3] + selenium[4] (vilket
+råkar vara det vi kör för alla tester). Varför vill man hitta på taggar då? Jo,
+när man exekverar testen så kan man t.ex. speca att den bara ska köra scenarion
+med en viss tagg eller hoppa över med en annan. På så sätt kan man gruppera 
+tester. För mer om taggar se dokumentationen[5]
+
+Själva scenariot skriver man i formen *Givet* ... *När* ... *Så* ...
+dvs en mening måste börja med något av de orden. Man kan även använda *Och* för 
+att få ett mer naturligt flyt, cucumber tolkar det då som det man skrev på raden
+ovan.
+
+Helt magiskt är det dock inte utan man måste även definiera upp ruby kod som matchar
+mot stegen beskrivna i testet och som utför det som beskrivs, dessa steg skriver
+man i valfri fil under mappen *step_definitions*. Om man kör en feature så 
+kommer cucumber spotta ur sig skelett kod för varje steg som saknas. Det är bara 
+klippa, klistra och fylla på med kod.
+
+Installation
+------------
+För installations instruktioner se Richard Nyströms exempel på github[6]
+
+
+Exekvera test
+-------------
+Testerna ligger i en mapp *features*, står man utanför den mappen och exekverar
+cucumber utan argument kör man alla tester.
+
+    $ cucumber 
+
+För att köra alla scenarion i en feature:
+
+    $ cucumber features/skapa_plats.feature
+
+För att bara köra scenarion taggade med @share
+
+    $ cucumber --tags @share
+
+
+Capybara, Selenium och Alfresco
+-------------------------------
+Vi kör capybara[3] med selenium[4] konfigurerad som baksida. Det innebär att 
+cucumber startar igång en browser (Firefox) och exekverar via selenium[4] klick,
+fyller i formulär och kör javascript. Teoretisk sätt ska vi på Windows kunna 
+köra direkt mot IE istället. 
+
+Capybara[3] är en ruby modul som har ett API som abstraherar bort selenium[4]
+(man kan använda flera andra baksidor) så när vi skriver tester för Alfresco
+är det capybara[3] kod, *inte* selenium[4] kod som vi skriver. Kolla på 
+capybaras dokumentation, den är ganska bra. Ett tips är att om man tittar på
+API dokumentationen finns en liten knapp "show source" som visar källkoden för
+ett visst capybara kommando, riktigt bra ibland.
+
+Vi tar ett exempel
+
+Givet att vi har en feature med raden:
+
+    När jag klickar på länken "Dokumentbibliotek"
+
+Så skriver följande implentetation:
+
+    När /^jag klickar på länken "([^"]*)"$/ do |link|
+      click_link link
+    end
+
+Första raden definierar en regexp, om du tillhör dem som är mindre bekväma med 
+regexpar så misströsta ej, det är just den delen som cucumber generar till dig
+om du kör steg utan implentetation. *click_link* är ett capybara[3] kommando som
+helt enkelt klickar på en länk. 
+
+
+Tips, trick och varningar
+-------------------------
+Se existerande test för en bakgrund som loggar och sätter upp en testplats, 
+finns även för uppladdning av testfil. Skriv inte tester som är beroende på
+extern förberedelser, t.ex. uppladning av filer.
+
+Capybara[3] och Cucumber[1] är väldigt trevliga, men Alfrescos javascript gör
+det ibland nästan helt omöjligt att testa vissa saker, här kommer ett par tips:
+
+### Timing fel
+Ett vanligt problem är timing fel. Alfresco är duktig på att ha knappar som är 
+skuggade tills man gör ett visst val. Om du i testet t.ex. först fyller
+i ett fält och sedan klickar på "spara" så kan du ibland få fel för att knappen
+fortfarande är disabled! Problemet är att ditt test är snabbare än javascript 
+eventet som ska "avskugga" knappen. Lösningen är att vänta en liten stund, 1 
+eller 2 sekunder verkar funger bra.
+
+    fill_in "name", with =    "foobar"
+    sleep 2
+    click_button "Spara" 
+
+### Vänta på AJAX laddningar
+Alfresco gör ofta saker med AJAX anrop och visar små fina dialoger när de är 
+klara, för att inte testet ska gå vidare för snabbt kan du vänta på dem. Det 
+finns ett allmänt steg som gör detta:
+
+    Så /^ska jag se "([^"]*)"$/ do |txt|
+      wait_until { page.has_content? txt }
+    end
+
+Den testar helt enkelt hela sidan med jämna mellanrum för given sträng, så se 
+till att texten bara finns i dialogen och inte redan på sidan.
+
+### Kalla på steg ifrån andra steg
+Ibland skriver man kod som i stort sett är ett par andra steg, kanske för att 
+de redan finns i ett test men nu vill man använda dem i en *Givet att...* sats.
+För att kalla på ett steg skriver man bara såhär:
+
+    När 'jag klickar på länken "foobar"'
+    
+Man kan även skicka vidare argument:
+
+    När /^väljer "([^"]*)" ifrån rullgardinslistan "([^"]*)"$/ do |arg1, arg2|
+        När "jag väljer \"#{arg1}\" ifrån rullgardinslistan \"#{arg2}\""
+    end
+
+### YUI split buttons och menyer
+Att välja något ur en meny kan vara ganska knepigt då man bara får klicka på 
+synliga länkar, men pga av implementationen av YUIs "split button" så har vi i
+skrivande stund inte löst hur man klickar på dem så att menyn visas. Dock kan 
+man visa menyn genom javascript, man måste bara få tag på meny objektet. 
+Alfresco använder sig överallt av ett eget klass system som de kallar 
+komponenter och alla instanser registreras på ett ställe, så för att t.ex. visa 
+en av menyerna i dokumentbiblioteket kan man göra följande
+
+    När /^väljer "Publicera till lagret" i menyn "Valda objekt"$/ do 
+        page.execute_script("Alfresco.util.ComponentManager.find({name:'Alfresco.DocListToolbar'})[0].widgets.selectedItems._menu.show()")
+        click_link "Publicera till lagret"
+    end 
+
+Det är javascriptet som är magin här, 'Alfresco.util.ComponentManager.find({name:'Alfresco.DocListToolbar'})[0].widgets.selectedItems._menu.show()'
+Många problem kan lösas på liknande sätt.
+
+### Menyer som visas vid mouseover
+Det finns en hel del ställen med menyer som visas vid mouseover, t.ex. 
+datalistor. Tyvärr har vi inte lyckats lösa dem på samma sätt som med split 
+buttons, och alla försök att med jQuery fejka mouseover events har hittils inte
+lyckats. Grundproblemet är att knapparna läggs till i DOM trädet vid mouseover,
+de finns alltså inte där från början, så det räcker inte med att bara göra dem
+synliga.
+
+
+### Filuppladdningar
+Vi har inte heller löst hur man kör en filuppladdning via flash gränssnittet, så
+för att testerna ska fungera måste du stänga av flash i 
+*share-custom-config.xml*
+
+
+
+
+[1] http://cukes.info/
+[2] https://github.com/cucumber/cucumber/wiki/Gherkin
+[3] https://github.com/jnicklas/capybara
+[4] http://seleniumhq.org/
+[5] https://github.com/cucumber/cucumber/wiki/tags
+[6] https://github.com/ricny046/alfresco-cucumber

@@ -1,0 +1,35 @@
+Installation on Ubuntu
+======================
+
+sudo apt-get install curl git-core build-essential libxml2-dev libxslt1-dev
+
+bash < <(curl -s https://rvm.beginrescueend.com/install/rvm) Follow the instructions given by
+this command. Usually it tells you to add a row in your .bash_profile.
+
+source .bash_profile
+
+rvm pkg install zlib
+rvm install 1.9.2 # This step takes a while as it needs to compile Ruby.
+
+rvm --default use 1.9.2
+
+ruby -v and make sure you have version 1.9.2
+
+install gems:
+gem install cucumber crack httpclient capybara rspec
+
+If you get problems with the zlib library when installing the gems do this:
+rvm package install zlib (yes, install it again...)
+rvm remove 1.9.2
+rvm install 1.9.2 (yes install it again...)
+
+
+Clone the examples from Github:
+git clone git://github.com/Redpill-Linpro/Alfresco-Tooling.git
+
+cd alfresco-cucumber
+
+cucumber features (make sure you have Alfresco running locally on localhost:8080 and that the the admin password is admin)
+
+More information on how to use Cucumber can be found here: http://www.cukes.info/
+More information about Capybara, the test frameworks that is used to test stuff in the browser: http://www.cukes.info/
