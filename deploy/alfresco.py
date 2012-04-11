@@ -13,7 +13,9 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
+import os
 import os.path as path
+import shutil
 from subprocess import call
 
 
@@ -93,6 +95,42 @@ class Alfresco(object):
         self.reload_repo()
         self.reload_share()
         
+    def override(self,pth):
+        """Override a file in alfresco, i.e copy it to our source tree in a proper place"""
+        pth = path.abspath(pth)
+        if not path.isfile(pth):
+            print "Can't find file: %s" % pth
+            return
+        
+        def copy(src_pth):
+            #there might not be a proper folder for it
+            folder = path.dirname(src_pth)
+            if not path.exists(folder):
+                os.makedirs(folder)
+            
+            print "Copying file"
+            print "From:",pth
+            print "To:",src_pth
+            #shutil.copy(pth,src_pth)
+        
+            
+        
+        #check if it's share or repo
+        if '/share/' in pth:
+            #is it in config or in 
+            if '/WEB-INF/classes/alfresco/' in pth:
+                copy(path.join(self.share,'config/alfresco/web-extension' ,pth.split('/WEB-INF/classes/alfresco/')[1]))                    
+            elif '/WEB-INF/classes' in pth:
+                print "I don't know how to override that, sorry"
+            else:
+                #must be web
+                copy(path.join(self.share,'webapp' ,pth.split('/share/')[1]))
+        
+        else: #hence repo 
+            print "Overriding repo webscript, you might need to manually copy these to webapps alfresco since overriding doesn't always work here"
+            copy(path.join(self.repo,'config',pth.split('/WEB-INF/classes/')[1]))
+        
+        
         
 if __name__ == "__main__":
     import sys
@@ -121,11 +159,9 @@ share:   %s
     parser.add_argument('-r','--repo'  ,default="trunk/repo/src/main/" ,help="Path to repo src")
     sub = parser.add_subparsers(help="Action subparser")
 
-
+    #sync
     sync = sub.add_parser('sync',help="Sync files with rsync")
     sync.add_argument('scope',choices=['repo','share','webapp','all'],help="What to sync, 'share' will also sync webapp and 'all' syncs them all")
-
-
 
     def sync_func(args):
         if not args.quiet:
@@ -135,7 +171,8 @@ share:   %s
         a.notify("Synced %s" % args.scope)
         
     sync.set_defaults(func=sync_func)
-
+    
+    #reload
     rel = sub.add_parser('reload',help="Reload wbescript with curl")
     rel.add_argument('scope',choices=['repo','share','all'],help="What to reload, 'repo','share' or 'all'")
     
@@ -148,6 +185,7 @@ share:   %s
 
     rel.set_defaults(func=rel_func)
 
+    #deploy
     deploy = sub.add_parser('deploy',help="Sync and reload")
     deploy.add_argument('scope',choices=['repo','share','all'],help="What to sync and reload: 'repo','share' or 'all'")
 
@@ -160,10 +198,21 @@ share:   %s
         a.notify("Synced and reloaded %s" % args.scope)
 
     deploy.set_defaults(func=deploy_func)
+    
+    #override
+    override = sub.add_parser('override',help="Override a file in Alfresco")
+    override.add_argument('file',help="Path to file to overide")
+
+    def override_func(args):
+        if not args.quiet:
+            using(args.tomcat,args.tomcat_share,args.repo,args.share)
+        a = Alfresco(args)
+        a.override(args.file)
+        
+    override.set_defaults(func=override_func)
 
     args = parser.parse_args()
     args.func(args)
-
     
     
     
