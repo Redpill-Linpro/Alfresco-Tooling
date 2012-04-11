@@ -111,7 +111,7 @@ class Alfresco(object):
             print "Copying file"
             print "From:",pth
             print "To:",src_pth
-            #shutil.copy(pth,src_pth)
+            shutil.copy(pth,src_pth)
         
             
         
