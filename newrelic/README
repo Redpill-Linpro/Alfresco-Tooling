@@ -4,13 +4,13 @@ Tested with Alfresco 3.2.2.7 Enterprise on Tomcat. The following instructions ap
 
 Requirements
 * App server running Alfresco Share 3.2 on Tomcat
-* NewRelic account
+* NewRelic account (NewRelic module 2.5.0)
 * Ant
 
 Build Instructions
 The module has a dependency on the Alfresco 3.2 SDK which should be installed/unzipped to a known location.
 Modify the sdk.dir property in the build.properties file to point to your Alfresco SDK installation.
-Download the newrelic-api.jar from newrelic.com and put it in the lib folder.
+Download the newrelic-api.jar (can be found in newrelic_agent2.5.0.zip) from your newrelic.com account and put it in the lib folder.
 Execute ant package-jar to build the required jar file.
 
 Installation Instructions
