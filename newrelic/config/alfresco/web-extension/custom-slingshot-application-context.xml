@@ -17,7 +17,7 @@
     along with NewRelic Module for Alfresco.  If not, see <http://www.gnu.org/licenses/>.
 -->
 <beans>
-   <bean id="newrelicTemplateExtension" parent="baseTemplateExtension" class="org.alfresco.web.scripts.NewRelicMethod">
+   <bean id="newrelicTemplateExtension" parent="baseTemplateExtension" class="org.springframework.extensions.webscripts.NewRelicMethod">
        <property name="extensionName">
            <value>newrelic</value>
        </property>
