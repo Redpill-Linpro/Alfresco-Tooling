@@ -1,0 +1,32 @@
+Readme for Newrelic module for Alfresco 4.0
+
+Tested with Alfresco 4.0.1 Enterprise on Tomcat. The following instructions apply for Tomcat 6.0.x but similar steps should work on other application servers as well.
+
+Requirements
+* App server running Alfresco Share 4.0 on Tomcat
+* NewRelic account (NewRelic module 2.5.0)
+* Ant
+
+Build Instructions
+The module has a dependency on the Alfresco 4.0 SDK which should be installed/unzipped to a known location.
+Modify the sdk.dir property in the build.properties file to point to your Alfresco SDK installation.
+Download the newrelic-api.jar (can be found in newrelic_agent2.5.0.zip) from your newrelic.com account and put it in the lib folder.
+Execute ant package-jar to build the required jar file.
+
+Installation Instructions
+Install NewRelic on your application server according to the instructions you can find on newrelic.com under your account.
+Copy the built jar file to %APPSERVER%/webapps/share/WEB-INF/lib/
+Edit %APPSERVER%/webapps/share/WEB-INF/classes/alfresco/templates/org/alfresco/include/alfresco-template.ftl and add the following section in the head tag after the title, meta fields and </#if>.
+<#-- Redpill Linpro AB: BEGIN INSERT AND ADD NEWRELIC -->
+    <#if !context.requestContext.passiveMode>
+		${newrelic.browserTimingHeader}
+    </#if>
+<#-- Redpill Linpro AB: END INSERT AND ADD NEWRELIC -->
+Add the following section to the end of the file, just before <#if !PORTLET></body>
+<#-- Redpill Linpro AB: BEGIN INSERT AND ADD NEWRELIC -->
+    <#if !context.requestContext.passiveMode>
+		${newrelic.browserTimingFooter}
+    </#if>
+<#-- Redpill Linpro AB: END INSERT AND ADD NEWRELIC -->
+
+Restart the server and log in to your NewRelic account and watch statistics being collected for your alfresco instance.
