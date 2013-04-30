@@ -4,6 +4,6 @@ ${d?replace('store://?', '', 'r')}
 <#list siteNodes as s>
 ${s?replace('store://?', '', 'r')}
 </#list>
-<#list avmNodes as a>
-${a?replace('store://?', '', 'r')}
+<#list personNodes as p>
+${p?replace('store://?', '', 'r')}
 </#list>
