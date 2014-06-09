@@ -1,0 +1,52 @@
+<?xml version="1.0"?>
+<!-- 
+    This file is part of NewRelic Module for Alfresco.
+
+    NewRelic Module for Alfresco is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Lesser General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Foobar is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Lesser General Public License for more details.
+
+    You should have received a copy of the GNU Lesser General Public License
+    along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
+-->
+<!--
+    Build script for NewRelic Alfresco module. Compatible with Alfresco 3.2.2.7!
+    Author: Marcus Svensson - Redpill Linpro AB - <marcus.svensson@redpill-linpro.com>
+-->
+<project name="NewRelic Module" default="package-jar" basedir=".">
+	<property file="build.properties" />
+	
+	<path id="class.path">
+		<dirset dir="${build.dir}" />
+		<fileset dir="${sdk.dir}/lib/server" includes="**/*.jar" />
+		<fileset dir="lib" includes="**/*.jar" />
+	</path>
+
+	<target name="clean">
+		<delete dir="${dist.dir}"/>	
+		<delete dir="${build.dir}"/>	
+	</target>
+	
+	<target name="compile">
+		<mkdir dir="${build.dir}" />
+		<javac classpathref="class.path" srcdir="${project.dir}/source" destdir="${build.dir}" />
+	</target>
+
+	<target name="package-jar" depends="compile">
+		<mkdir dir="${dist.dir}" />
+		<delete file="${package.file.jar}" />
+		<jar destfile="${package.file.jar}">
+			<fileset dir="${build.dir}" excludes="*.zip" />
+			<fileset dir="${config.dir}" excludes="*.zip" />
+		</jar>
+	</target>
+	<target name="install" depends="package-jar">
+		<copy file="${package.file.jar}" todir="${share.dir}/WEB-INF/lib" />
+	</target>
+</project>

@@ -2,57 +2,50 @@ script:
 {
 	
 	var dictionaryNodesQuery = "PATH:\"/app:company_home/app:dictionary//*\" AND TYPE:\"cm:content\"";
+	var personNodesQuery = "TYPE:\"cm:person\"";
 	var siteStoreName = "avm://sitestore";
 		
-	// check if a site has been provided, if so add the site content to the exclude list...
+	// check if a site has been provided, if so add the site content to the list...
 	if (args.site == undefined  || args.site == null || args.site.length == 0) {
-		logger.log("Listing Data Dictionary and avm:sitestore content");
 		
-		// add all content in data dictionary to the exclude list
+		// add all content in data dictionary to the list
 		var nodes = search.luceneSearch(dictionaryNodesQuery);
+		logger.log("Listing Data Dictionary nodes, found " + nodes.length + " nodes with potential content!");
 		var dictionaryNodes = [];
 		for (var i=0; i<nodes.length; i++) {
-			if(nodes[i]!=null) {
-				dictionaryNodes.push(contentUrlResolver.getContentUrl(nodes[i].nodeRef));
-			}
-			else {
-				logger.log("Found null node in Data Dictionary!");
-			}
+			push(dictionaryNodes, nodes[i], "cm:content");
 		}
 		model.dictionaryNodes = dictionaryNodes;
+		logger.log("Done with Dictionary nodes");
 		
-		//add all content in avm:sitestore to the exclude list (to keep site settings correct)
-		var xpathnodes = search.xpathSearch(siteStoreName, "/");
-		var siteStoreNodes = [];
-		if(xpathnodes[0] == undefined || xpathnodes[0] == null) {
-			status.code = 404;
-			status.message = "AVM store " + siteStoreName + " not found.";
-			status.redirect = true;
-			break script;
+		// add all cm:person content to the list
+		
+		var nodes = search.luceneSearch(personNodesQuery);
+		logger.log("Listing User nodes, found " + nodes.length + " nodes with potential content!");;
+		var personNodes = [];
+		for (var i=0; i<nodes.length; i++) {
+			push(personNodes, nodes[i], "cm:preferenceValues");
+			push(personNodes, nodes[i], "cm:persondescription");
 		}
-		else {
-			logger.log("Found AVM store " + siteStoreName);
-			addAvmNode(xpathnodes[0], siteStoreNodes);		
-		}
-		model.avmNodes = siteStoreNodes;
+		model.personNodes = personNodes;
+		logger.log("Done with User nodes");
+		
+		//Ignore sites for now
 		model.siteNodes = [];
 	}
 	else if(siteService.getSite(args.site) != null){
-		logger.log("Listing content in site " + args.site);
 		var siteNodesQuery = "PATH:\"/app:company_home/st:sites/cm:" + args.site + "//*\" AND TYPE:\"cm:content\"";
 		var nodes = search.luceneSearch(siteNodesQuery);
+		logger.log("Listing nodes in site " + args.site + ", found " + nodes.length + " nodes with potential content!");
 		var siteNodes = [];
 		for (var i=0; i<nodes.length; i++) {
-			if(nodes[i]!=null) {
-				siteNodes.push(contentUrlResolver.getContentUrl(nodes[i].nodeRef));
-			}
-			else {
-				logger.log("Found null node in site " + args.site);
-			}
+			push(siteNodes, nodes[i], "cm:content");
 		}
 		model.siteNodes = siteNodes;
-		model.avmNodes = [];
+		logger.log("Done with site nodes");
+		
 		model.dictionaryNodes = [];
+		model.personNodes = [];
 	}
 	else {
 		status.code = 404;
@@ -70,6 +63,18 @@ function addAvmNode(parentNode, nodes) {
 		}
 	}
 	else if(parentNode.isDocument){
-		nodes.push(contentUrlResolver.getContentUrl(parentNode.nodeRef));
+		push(nodes, parentNode, "cm:content");
 	}
 } 
+
+function push(urls, node, property) {
+	try {
+		var contentUrl = contentUrlResolver.getContentUrl(node.nodeRef, property);
+		logger.log("Found url " + contentUrl + " for property " + property + " on node " + node.nodeRef);
+		urls.push(contentUrl);
+	}
+	catch(e) {
+		logger.log(e);
+	}
+
+}
